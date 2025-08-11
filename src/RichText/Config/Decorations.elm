@@ -1,6 +1,7 @@
 module RichText.Config.Decorations exposing
     ( Decorations, ElementDecoration, MarkDecoration, emptyDecorations, elementDecorations, markDecorations, topLevelAttributes, withMarkDecorations, withElementDecorations, withTopLevelAttributes
     , addElementDecoration, addMarkDecoration, selectableDecoration
+    , focusingDecoratoin
     )
 
 {-| Decorations are functions which add a list of Html.Attribute to rendered elements and marks. They're
@@ -24,7 +25,7 @@ import Html.Attributes
 import Html.Events
 import RichText.Config.ElementDefinition as ElementDefinition exposing (ElementDefinition)
 import RichText.Config.MarkDefinition as MarkDefinition exposing (MarkDefinition)
-import RichText.Internal.Constants exposing (selection)
+import RichText.Internal.Constants exposing (focusingAnnotation, focusingId, selection)
 import RichText.Internal.Editor exposing (Message(..), Tagger)
 import RichText.Model.Element exposing (Element, annotations)
 import RichText.Model.Mark exposing (Mark)
@@ -232,3 +233,12 @@ selectableDecoration tagger editorNodePath elementParameters _ =
                     SelectionEvent (Just (caret editorNodePath 0)) False
                 )
            ]
+
+
+focusingDecoratoin : Path -> Element -> Path -> List (Html.Attribute msg)
+focusingDecoratoin _ elementParameters _ =
+    if Set.member focusingAnnotation (annotations elementParameters) then
+        [ Html.Attributes.id focusingId ]
+
+    else
+        []

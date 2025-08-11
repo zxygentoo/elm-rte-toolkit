@@ -765,6 +765,7 @@ view cfg editor_ =
                   , Html.Keyed.node "div"
                         ([ Html.Attributes.contenteditable True
                          , Html.Attributes.class "rte-main"
+                         , Html.Attributes.id "rte-main"
                          , Html.Attributes.attribute "data-rte-main" "true"
                          , Html.Attributes.classList [ ( "rte-hide-caret", shouldHideCaret state_ ) ]
                          , onBeforeInput tagger commandMap_ spec_ editor_

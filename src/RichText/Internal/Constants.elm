@@ -1,4 +1,7 @@
-module RichText.Internal.Constants exposing (zeroWidthSpace, selection, selectable, lift)
+module RichText.Internal.Constants exposing
+    ( zeroWidthSpace, selection, selectable, lift
+    , focusingAnnotation, focusingId
+    )
 
 {-| Miscellaneous constants used throughout the code
 
@@ -38,3 +41,17 @@ cleared before a transform or command is complete.
 lift : String
 lift =
     "__lift__"
+
+
+{-| Annotation add to current focused node
+-}
+focusingAnnotation : String
+focusingAnnotation =
+    "__focusing__"
+
+
+{-| HtmlNode id add to current focused node
+-}
+focusingId : String
+focusingId =
+    "rte-focusing-element"

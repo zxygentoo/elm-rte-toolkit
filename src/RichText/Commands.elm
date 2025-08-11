@@ -3776,7 +3776,7 @@ insertAfterBlockLeaf blockToInsert state =
                             newAnchorPath =
                                 increment (anchorNode selection) ++ relativeSelectablePath
                         in
-                        Ok (State.state newRoot (Just <| caret newAnchorPath 0))
+                        Ok (State.state newRoot (Just <| caret newAnchorPath 0) (Just selection))
 
 
 {-| Insert a newline at the selection in elements with the name whitelisted by the String list. This

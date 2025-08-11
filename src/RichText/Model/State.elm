@@ -7,8 +7,11 @@ track of and manipulate the contents of the editor.
 
 -}
 
+import RichText.Annotation exposing (addAtPath, clear)
+import RichText.Internal.Constants exposing (focusingAnnotation)
 import RichText.Model.Node exposing (Block)
-import RichText.Model.Selection exposing (Selection)
+import RichText.Model.Selection exposing (Selection, focusNode)
+import RichText.Node exposing (findTextBlockNodeAncestor)
 
 
 {-| A `State` consists of a root block and a selection. `State` allows you to keep
@@ -21,6 +24,7 @@ type State
 type alias Contents =
     { root : Block
     , selection : Maybe Selection
+    , lastSelection : Maybe Selection
     }
 
 
@@ -48,9 +52,9 @@ state root Nothing
 ```
 
 -}
-state : Block -> Maybe Selection -> State
-state root_ sel_ =
-    State { root = root_, selection = sel_ }
+state : Block -> Maybe Selection -> Maybe Selection -> State
+state root_ sel_ lasel =
+    State { root = root_, selection = sel_, lastSelection = lasel }
 
 
 {-| the selection from the state
@@ -72,12 +76,21 @@ root st =
 
 
 {-| a state with the given selection
+this will store the old selection into lastSelection
 -}
 withSelection : Maybe Selection -> State -> State
 withSelection sel st =
     case st of
         State s ->
-            State { s | selection = sel }
+            State
+                { s
+                    | selection = sel
+                    , lastSelection = s.selection
+                    , root =
+                        s.root
+                            |> clear focusingAnnotation
+                            |> addFocusingAnnotation sel
+                }
 
 
 {-| a state with the given root
@@ -87,3 +100,23 @@ withRoot node st =
     case st of
         State s ->
             State { s | root = node }
+
+
+
+-- Helpers
+
+
+addFocusingAnnotation : Maybe Selection -> Block -> Block
+addFocusingAnnotation sel_ rootBlock =
+    case sel_ of
+        Just sel ->
+            case findTextBlockNodeAncestor (focusNode sel) rootBlock of
+                Just ( focusingPath, _ ) ->
+                    addAtPath focusingAnnotation focusingPath rootBlock
+                        |> Result.withDefault rootBlock
+
+                Nothing ->
+                    rootBlock
+
+        Nothing ->
+            rootBlock
