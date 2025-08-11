@@ -1,6 +1,6 @@
 module RichText.Internal.Constants exposing
     ( zeroWidthSpace, selection, selectable, lift
-    , focusingAnnotation, focusingId
+    , focusingAnnotation
     )
 
 {-| Miscellaneous constants used throughout the code
@@ -48,10 +48,3 @@ lift =
 focusingAnnotation : String
 focusingAnnotation =
     "__focusing__"
-
-
-{-| HtmlNode id add to current focused node
--}
-focusingId : String
-focusingId =
-    "rte-focusing-element"

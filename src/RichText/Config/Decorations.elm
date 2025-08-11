@@ -1,7 +1,7 @@
 module RichText.Config.Decorations exposing
     ( Decorations, ElementDecoration, MarkDecoration, emptyDecorations, elementDecorations, markDecorations, topLevelAttributes, withMarkDecorations, withElementDecorations, withTopLevelAttributes
     , addElementDecoration, addMarkDecoration, selectableDecoration
-    , focusingDecoratoin
+    , focusingDecoratoin, focusingId
     )
 
 {-| Decorations are functions which add a list of Html.Attribute to rendered elements and marks. They're
@@ -25,7 +25,7 @@ import Html.Attributes
 import Html.Events
 import RichText.Config.ElementDefinition as ElementDefinition exposing (ElementDefinition)
 import RichText.Config.MarkDefinition as MarkDefinition exposing (MarkDefinition)
-import RichText.Internal.Constants exposing (focusingAnnotation, focusingId, selection)
+import RichText.Internal.Constants exposing (focusingAnnotation, selection)
 import RichText.Internal.Editor exposing (Message(..), Tagger)
 import RichText.Model.Element exposing (Element, annotations)
 import RichText.Model.Mark exposing (Mark)
@@ -242,3 +242,10 @@ focusingDecoratoin _ elementParameters _ =
 
     else
         []
+
+
+{-| HtmlNode id add to current focused node
+-}
+focusingId : String
+focusingId =
+    "rte-focusing-element"
