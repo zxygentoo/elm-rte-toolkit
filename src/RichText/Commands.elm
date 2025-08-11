@@ -194,7 +194,7 @@ defaultCommandMap =
             [ ( "selectAll", transform selectAll ) ]
         |> set [ inputEvent "historyUndo", key [ short, "z" ] ]
             [ ( "undo", internal Undo ) ]
-        |> set [ inputEvent "historyRedo", key [ short, shift, "z" ] ]
+        |> set [ inputEvent "historyRedo", key [ shift, short, "Z" ] ]
             [ ( "redo", internal Redo ) ]
         |> withDefaultKeyCommand defaultKeyCommand
         |> withDefaultInputEventCommand defaultInputEventCommand
