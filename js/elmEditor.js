@@ -305,11 +305,18 @@ class ElmEditor extends HTMLElement {
     }
 
     scrollCallback(e) {
-        e.preventDefault();
-        // console.log('Component scrolled:', this.scrollTop);
         const newEvent = new CustomEvent("editorscroll", {
             detail: {
-                top: this.scrollTop,
+                scene: {
+                    width: this.scrollWidth,
+                    height: this.scrollHeight
+                },
+                viewport: {
+                    x: this.scrollLeft,
+                    y: this.scrollTop,
+                    width: this.clientWidth,
+                    height: this.clientHeight
+                }
             }
         });
         this.dispatchEvent(newEvent)
