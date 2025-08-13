@@ -3,7 +3,7 @@ module RichText.Editor exposing
     , Config, config, commandMap, decorations, spec
     , Message, update, apply, applyList, applyNoForceSelection
     , view, readOnlyView
-    , viewport
+    , viewport, withViewport
     )
 
 {-| This is the main module for an editor, and contains functions for initializing, updating, and
@@ -1075,6 +1075,17 @@ changeCount =
 withHistory : History -> Editor -> Editor
 withHistory =
     InternalEditor.withHistory
+
+
+{-| Sets the viewport of the editor.
+
+    editor
+        |> withHistory newViewport
+
+-}
+withViewport : Viewport -> Editor -> Editor
+withViewport =
+    InternalEditor.withViewport
 
 
 {-| Apply a list of named commands to the editor to try in order, returning the updated editor after
