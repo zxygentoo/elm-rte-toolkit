@@ -8,7 +8,7 @@ import BoundedDeque exposing (BoundedDeque)
 import RichText.Config.Command exposing (Command(..), InternalAction(..), NamedCommand, NamedCommandList)
 import RichText.Config.Keys exposing (meta)
 import RichText.Config.Spec exposing (Spec)
-import RichText.Internal.Event exposing (EditorChange, InitEvent, InputEvent, KeyboardEvent, PasteEvent)
+import RichText.Internal.Event exposing (EditorChange, InitEvent, InputEvent, KeyboardEvent, PasteEvent, Scroll)
 import RichText.Internal.History exposing (History, contents, empty, fromContents)
 import RichText.Model.Selection exposing (Selection)
 import RichText.Model.State exposing (State)
@@ -36,6 +36,7 @@ type alias EditorContents =
     , bufferedEditorState : Maybe State
     , history : History
     , changeCount : Int
+    , scrollTop : Float
     }
 
 
@@ -56,6 +57,7 @@ editor iState =
         , state = iState
         , history = empty { size = defaultDequeSize, groupDelayMilliseconds = 500 }
         , changeCount = 0
+        , scrollTop = 0
         }
 
 
@@ -70,6 +72,7 @@ type Message
     | CompositionEnd
     | PasteWithDataEvent PasteEvent
     | CutEvent
+    | ScrollEvent Scroll
     | Init InitEvent
 
 
@@ -169,6 +172,13 @@ withShortKey key e =
     case e of
         Editor c ->
             Editor { c | shortKey = key }
+
+
+withScroll : Float -> Editor -> Editor
+withScroll topLeft e =
+    case e of
+        Editor c ->
+            Editor { c | scrollTop = topLeft }
 
 
 incrementChangeCount : Editor -> Editor
@@ -379,3 +389,10 @@ applyNamedCommandList list spec editor_ =
         )
         (Err "No commands found")
         list
+
+
+scrollTop : Editor -> Float
+scrollTop e =
+    case e of
+        Editor c ->
+            c.scrollTop

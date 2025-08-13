@@ -275,6 +275,11 @@ class ElmEditor extends HTMLElement {
         this.pasteCallback = this.pasteCallback.bind(this);
         this._observer = new MutationObserver(this.mutationObserverCallback);
         this.addEventListener("paste", this.pasteCallback);
+        
+        // scroll
+        this.scrollCallback = this.scrollCallback.bind(this);
+        this.addEventListener("scroll", this.scrollCallback);
+        
         this.addEventListener("compositionstart", this.compositionStart.bind(this));
         this.addEventListener("compositionend", this.compositionEnd.bind(this));
         this.dispatchInit = this.dispatchInit.bind(this)
@@ -282,6 +287,8 @@ class ElmEditor extends HTMLElement {
     }
 
     connectedCallback() {
+        this.style.overflow = "auto";
+
         this._observer.observe(this, {
             characterDataOldValue: true,
             attributeOldValue: false,
@@ -295,6 +302,17 @@ class ElmEditor extends HTMLElement {
 
     disconnectedCallback() {
         this._observer.disconnect();
+    }
+
+    scrollCallback(e) {
+        e.preventDefault();
+        // console.log('Component scrolled:', this.scrollTop);
+        const newEvent = new CustomEvent("editorscroll", {
+            detail: {
+                top: this.scrollTop,
+            }
+        });
+        this.dispatchEvent(newEvent)
     }
 
     pasteCallback(e) {

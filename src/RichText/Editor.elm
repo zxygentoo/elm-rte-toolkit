@@ -3,6 +3,7 @@ module RichText.Editor exposing
     , Config, config, commandMap, decorations, spec
     , Message, update, apply, applyList, applyNoForceSelection
     , view, readOnlyView
+    , scrollTop
     )
 
 {-| This is the main module for an editor, and contains functions for initializing, updating, and
@@ -70,10 +71,11 @@ import RichText.Internal.Editor as InternalEditor
         , updateEditorStateWithTimestamp
         , withBufferedEditorState
         , withComposing
+        , withScroll
         , withShortKey
         , withState
         )
-import RichText.Internal.Event exposing (EditorChange, InitEvent, PasteEvent, TextChange)
+import RichText.Internal.Event exposing (EditorChange, InitEvent, PasteEvent, Scroll, TextChange)
 import RichText.Internal.HtmlNode exposing (childNodesPlaceholder, editorBlockNodeToHtmlNode)
 import RichText.Internal.KeyDown as KeyDown
 import RichText.Internal.Paste as Paste
@@ -263,6 +265,9 @@ update cfg msg editor_ =
                 CutEvent ->
                     handleCut spec_ editor_
 
+                ScrollEvent e ->
+                    handleScroll e.top spec_ editor_
+
                 Init e ->
                     handleInitEvent e editor_
 
@@ -280,6 +285,11 @@ handleCut spec_ editor_ =
 
         Ok e ->
             forceRerender e
+
+
+handleScroll : Float -> Spec -> Editor -> Editor
+handleScroll topLeft spec_ editor_ =
+    editor_ |> withScroll topLeft
 
 
 textChangesDomToEditor : Spec -> Block -> List TextChange -> Maybe (List TextChange)
@@ -518,6 +528,14 @@ pasteWithDataDecoder =
             (D.at [ "detail", "html" ] D.string)
 
 
+scrollDecoder : D.Decoder Message
+scrollDecoder =
+    D.map ScrollEvent <|
+        D.map
+            Scroll
+            (D.at [ "detail", "top" ] D.float)
+
+
 initDecoder : D.Decoder Message
 initDecoder =
     D.map Init <|
@@ -539,6 +557,11 @@ onCompositionEnd msgFunc =
 onPasteWithData : (Message -> msg) -> Html.Attribute msg
 onPasteWithData msgFunc =
     Html.Events.on "pastewithdata" (D.map msgFunc pasteWithDataDecoder)
+
+
+onScroll : (Message -> msg) -> Html.Attribute msg
+onScroll msgFunc =
+    Html.Events.on "editorscroll" (D.map msgFunc scrollDecoder)
 
 
 onCut : (Message -> msg) -> Html.Attribute msg
@@ -760,6 +783,9 @@ view cfg editor_ =
                 , onPasteWithData tagger
                 , onCut tagger
                 , onInit tagger
+                , onScroll tagger
+                , Html.Attributes.id "editor"
+                , Html.Attributes.style "outline" "none"
                 ]
                 [ ( String.fromInt (completeRerenderCount editor_)
                   , Html.Keyed.node "div"
@@ -1106,3 +1132,8 @@ should not be used, but can be useful for situations like if you have an embedde
 applyNoForceSelection : NamedCommand -> Spec -> Editor -> Result String Editor
 applyNoForceSelection =
     InternalEditor.applyCommandNoForceSelection
+
+
+scrollTop : Editor -> Float
+scrollTop =
+    InternalEditor.scrollTop

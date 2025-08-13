@@ -1,4 +1,4 @@
-module RichText.Internal.Event exposing (EditorChange, InitEvent, InputEvent, KeyboardEvent, PasteEvent, TextChange)
+module RichText.Internal.Event exposing (EditorChange, InitEvent, InputEvent, KeyboardEvent, PasteEvent, Scroll, TextChange)
 
 {-| This module holds the records used for decoded events like input, keyboard, as well
 as a few custom events.
@@ -62,3 +62,10 @@ is the new text at that path.
 -}
 type alias TextChange =
     ( Path, String )
+
+
+{-| The attributes parsed from an `editorscroll` event.
+-}
+type alias Scroll =
+    { top : Float
+    }
