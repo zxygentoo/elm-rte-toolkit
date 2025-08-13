@@ -5,6 +5,7 @@ as well as the messages used to update the editor's internal state.
 -}
 
 import BoundedDeque exposing (BoundedDeque)
+import Browser.Dom exposing (Viewport)
 import RichText.Config.Command exposing (Command(..), InternalAction(..), NamedCommand, NamedCommandList)
 import RichText.Config.Keys exposing (meta)
 import RichText.Config.Spec exposing (Spec)
@@ -36,7 +37,7 @@ type alias EditorContents =
     , bufferedEditorState : Maybe State
     , history : History
     , changeCount : Int
-    , scrollTop : Float
+    , viewport : Viewport
     }
 
 
@@ -57,7 +58,10 @@ editor iState =
         , state = iState
         , history = empty { size = defaultDequeSize, groupDelayMilliseconds = 500 }
         , changeCount = 0
-        , scrollTop = 0
+        , viewport =
+            { scene = { width = 0, height = 0 }
+            , viewport = { x = 0, y = 0, width = 0, height = 0 }
+            }
         }
 
 
@@ -174,11 +178,11 @@ withShortKey key e =
             Editor { c | shortKey = key }
 
 
-withScroll : Float -> Editor -> Editor
-withScroll topLeft e =
+withViewport : Viewport -> Editor -> Editor
+withViewport vp e =
     case e of
         Editor c ->
-            Editor { c | scrollTop = topLeft }
+            Editor { c | viewport = vp }
 
 
 incrementChangeCount : Editor -> Editor
@@ -391,8 +395,8 @@ applyNamedCommandList list spec editor_ =
         list
 
 
-scrollTop : Editor -> Float
-scrollTop e =
+viewport : Editor -> Viewport
+viewport e =
     case e of
         Editor c ->
-            c.scrollTop
+            c.viewport

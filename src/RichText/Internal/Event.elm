@@ -4,6 +4,7 @@ module RichText.Internal.Event exposing (EditorChange, InitEvent, InputEvent, Ke
 as a few custom events.
 -}
 
+import Browser.Dom exposing (Viewport)
 import Json.Encode as E
 import RichText.Model.Node exposing (Path)
 import RichText.Model.Selection exposing (Selection)
@@ -65,7 +66,19 @@ type alias TextChange =
 
 
 {-| The attributes parsed from an `editorscroll` event.
+
+    { scene =
+        { width = Float
+        , height = Float
+        }
+    , viewport =
+        { x = Float
+        , y = Float
+        , width = Float
+        , height = Float
+        }
+    }
+
 -}
 type alias Scroll =
-    { top : Float
-    }
+    Viewport

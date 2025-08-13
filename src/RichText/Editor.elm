@@ -3,7 +3,7 @@ module RichText.Editor exposing
     , Config, config, commandMap, decorations, spec
     , Message, update, apply, applyList, applyNoForceSelection
     , view, readOnlyView
-    , scrollTop
+    , viewport
     )
 
 {-| This is the main module for an editor, and contains functions for initializing, updating, and
@@ -32,6 +32,7 @@ rendering an editor.
 -}
 
 import Array exposing (Array)
+import Browser.Dom exposing (Viewport)
 import Dict
 import Html exposing (Html)
 import Html.Attributes
@@ -71,11 +72,11 @@ import RichText.Internal.Editor as InternalEditor
         , updateEditorStateWithTimestamp
         , withBufferedEditorState
         , withComposing
-        , withScroll
         , withShortKey
         , withState
+        , withViewport
         )
-import RichText.Internal.Event exposing (EditorChange, InitEvent, PasteEvent, Scroll, TextChange)
+import RichText.Internal.Event exposing (EditorChange, InitEvent, PasteEvent, TextChange)
 import RichText.Internal.HtmlNode exposing (childNodesPlaceholder, editorBlockNodeToHtmlNode)
 import RichText.Internal.KeyDown as KeyDown
 import RichText.Internal.Paste as Paste
@@ -266,7 +267,7 @@ update cfg msg editor_ =
                     handleCut spec_ editor_
 
                 ScrollEvent e ->
-                    handleScroll e.top spec_ editor_
+                    handleScroll e spec_ editor_
 
                 Init e ->
                     handleInitEvent e editor_
@@ -287,9 +288,9 @@ handleCut spec_ editor_ =
             forceRerender e
 
 
-handleScroll : Float -> Spec -> Editor -> Editor
-handleScroll topLeft spec_ editor_ =
-    editor_ |> withScroll topLeft
+handleScroll : Viewport -> Spec -> Editor -> Editor
+handleScroll vp spec_ editor_ =
+    editor_ |> withViewport vp
 
 
 textChangesDomToEditor : Spec -> Block -> List TextChange -> Maybe (List TextChange)
@@ -531,9 +532,26 @@ pasteWithDataDecoder =
 scrollDecoder : D.Decoder Message
 scrollDecoder =
     D.map ScrollEvent <|
-        D.map
-            Scroll
-            (D.at [ "detail", "top" ] D.float)
+        D.field "detail" <|
+            D.map2 (\s vp -> { scene = s, viewport = vp })
+                (D.field "scene" sceneDecoder)
+                (D.field "viewport" viewportRecordDecoder)
+
+
+sceneDecoder : D.Decoder { width : Float, height : Float }
+sceneDecoder =
+    D.map2 (\width height -> { width = width, height = height })
+        (D.field "width" D.float)
+        (D.field "height" D.float)
+
+
+viewportRecordDecoder : D.Decoder { x : Float, y : Float, width : Float, height : Float }
+viewportRecordDecoder =
+    D.map4 (\x y width height -> { x = x, y = y, width = width, height = height })
+        (D.field "x" D.float)
+        (D.field "y" D.float)
+        (D.field "width" D.float)
+        (D.field "height" D.float)
 
 
 initDecoder : D.Decoder Message
@@ -1134,6 +1152,6 @@ applyNoForceSelection =
     InternalEditor.applyCommandNoForceSelection
 
 
-scrollTop : Editor -> Float
-scrollTop =
-    InternalEditor.scrollTop
+viewport : Editor -> Viewport
+viewport =
+    InternalEditor.viewport
